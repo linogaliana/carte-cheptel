@@ -1,0 +1,3 @@
+openpyxl
+git+https://github.com/inseefrlab/cartiflette@main
+plotnine
