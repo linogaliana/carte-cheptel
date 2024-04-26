@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
 import zipfile
-
+import s3fs
 
 def import_cheptel():
     url_cheptel = "https://www.insee.fr/fr/statistiques/fichier/2012795/TCRD_073.xlsx"
@@ -62,8 +62,14 @@ def create_dataset(cheptel2022=None, population2021=None, type_cheptel=None):
     return data_departement
 
 
-cheptel2022, type_cheptel = import_cheptel()
-population2021 = import_population()
-create_dataset(
-    cheptel2022=cheptel2022, population2021=population2021, type_cheptel=type_cheptel
-)
+if __name__ == "__main__":
+    fs = s3fs.S3FileSystem(
+        client_kwargs={'endpoint_url': 'https://'+'minio.lab.sspcloud.fr'}
+    )
+    cheptel2022, type_cheptel = import_cheptel()
+    population2021 = import_population()
+    data_departement = create_dataset(
+        cheptel2022=cheptel2022, population2021=population2021, type_cheptel=type_cheptel
+    )
+    with fs.open("lgaliana/data/radio_cheptel_habitants.csv", "w") as f:
+        data_departement.to_csv(f)
